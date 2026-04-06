@@ -216,3 +216,28 @@
  GET / 200 in 134ms (next.js: 10ms, application-code: 124ms)
  GET / 200 in 94ms (next.js: 7ms, application-code: 86ms)
 ✓ Compiled in 316ms
+ GET / 200 in 352ms (next.js: 7ms, application-code: 345ms)
+ POST /api/prefetch 200 in 9.3s (next.js: 110ms, application-code: 9.2s)
+[chat] Calling AI: https://open.bigmodel.cn/api/paas/v4 glm-4-flash
+[chat] AI raw output: ```json
+{
+  "narration": "沈知意垂眸不语，默默退后半步，避开华妃锐利的目光。她感受到后宫的权谋如同暗潮涌动，心中虽有不甘，却也只能将这份坚韧藏在心底。华妃的笑意冷冽，却并未再上前。而此时，太后身边的王嬷嬷却走到沈知意身边，轻声细语，似乎在传递着某种信息。\n\n“知意，你可知华妃虽骄纵，但皇帝对她的宠爱非同小可，你需谨慎行事。”王嬷嬷的声音虽轻，却如春雷般在沈知意心中响起。\n\n沈知意心中一动，她知道，后宫之路，步步惊心。\n\n宠爱：15/100\n心机：20/100\n健康：100/100\n势力：5/100\n银两：200\n智慧：30/100\n德行：10\
+[chat] Success, narration length: 270 choices: 3
+ POST /api/chat 200 in 13.0s (next.js: 194ms, application-code: 12.8s)
+ POST /api/prefetch 200 in 11.8s (next.js: 6ms, application-code: 11.8s)
+[chat] Calling AI: https://open.bigmodel.cn/api/paas/v4 glm-4-flash
+[chat] AI raw output: ```json
+{
+  "narration": "沈知意微微抬头，眼中闪过一丝坚定，她转身向王嬷嬷走去，轻声问道：“嬷嬷，您所说的是何意？请赐教。”王嬷嬷眼中闪过一丝赞许，缓缓开口：“华妃虽得宠，但后宫之中，恩宠易变，你需懂得如何自保，同时也要学会把握时机。皇帝虽喜好才情，但你也不可忽视自己的才华，以免错失良机。”\n\n沈知意心中明了，她深知王嬷嬷的话语中蕴含着深深的智慧。她暗自记下嬷嬷的忠告，同时也感受到后宫的复杂与深不可测。\n\n宠爱的数值在王嬷嬷的提点下缓缓上升，仿佛预示着沈知意未来在后宫的命运。",
+  "choices": [
+    {"id": 1, "text": "潜心
+[chat] Success, narration length: 227 choices: 3
+ POST /api/chat 200 in 11.1s (next.js: 4ms, application-code: 11.1s)
+ POST /api/prefetch 200 in 12.5s (next.js: 3ms, application-code: 12.5s)
+ POST /api/prefetch 200 in 13.6s (next.js: 4ms, application-code: 13.6s)
+✓ Compiled in 463ms
+✓ Compiled in 243ms
+✓ Compiled in 89ms
+✓ Compiled in 207ms
+ GET / 200 in 314ms (next.js: 231ms, application-code: 83ms)
+ GET / 200 in 34ms (next.js: 4ms, application-code: 30ms)

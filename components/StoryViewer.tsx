@@ -79,7 +79,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
   return (
     <div
       className="min-h-[200px] leading-loose text-base md:text-lg cursor-pointer select-none"
-      style={{ color: "var(--text-primary)" }}
+      style={{ color: "var(--text-primary)", textShadow: "0 0 8px rgba(0,0,0,0.5)" }}
       onClick={skipTyping}
     >
       {/* 剧情文本 */}

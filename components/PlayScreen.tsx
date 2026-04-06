@@ -263,7 +263,7 @@ export default function PlayScreen() {
 
       {/* ====== 主内容区（剧情+选项一起滚动） ====== */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto custom-scrollbar">
-        <div className="max-w-2xl mx-auto min-h-full bg-paper px-6 md:px-10 py-10 shadow-xl border-x" style={{ borderColor: "var(--border-gold)" }}>
+        <div className="max-w-2xl mx-auto min-h-full px-6 md:px-10 py-10 shadow-xl border-x" style={{ borderColor: "var(--border-gold)", background: "var(--bg-primary)" }}>
           {/* 剧情文本 */}
           <StoryViewer
             text={streamingText || displayText}
