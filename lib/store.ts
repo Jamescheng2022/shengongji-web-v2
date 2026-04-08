@@ -37,6 +37,7 @@ interface GameStore {
 
   // 潜台词系统
   pendingSubtext: string;  // 待解码的潜台词
+  pendingHighlight: string; // 当前剧情的金句高亮
   isSubtextRevealed: boolean;  // 潜台词是否已解锁
 
   // 存档
@@ -86,6 +87,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   lastStatChanges: {},
   // 潜台词系统
   pendingSubtext: '',
+  pendingHighlight: '',
   isSubtextRevealed: false,
   saves: [],
 
@@ -101,6 +103,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       lastNarration: '',
       lastStatChanges: {},
       pendingSubtext: '',
+      pendingHighlight: '',
       isSubtextRevealed: false,
     });
   },
@@ -115,6 +118,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       lastNarration: save.pendingNarration || '',
       lastStatChanges: save.pendingStatChanges || {},
       pendingSubtext: save.pendingSubtext || '',
+      pendingHighlight: '',
       isSubtextRevealed: false, // 读档后重置潜台词显示状态
     });
   },
@@ -173,6 +177,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       lastStatChanges: response.stat_changes,
       // 潜台词系统
       pendingSubtext: response.subtext || '',
+      pendingHighlight: response.highlight || '',
       isSubtextRevealed: false, // 新剧情默认隐藏潜台词
     });
 

@@ -21,6 +21,7 @@ export interface FixedScene {
   requires_insight?: boolean; // 是否需要洞察力选项
   leads_to?: string; // 下一场景ID（用于分支）
   episode_end?: boolean; // 第十集结束
+  highlight?: string;    // 金句高亮
 }
 
 // ========== 固定剧本剧情节点 ==========
@@ -1150,6 +1151,7 @@ export function fixedSceneToAIResponse(
     narration: scene.narration,
     choices: nextChoices,
     subtext: scene.subtext,
+    highlight: scene.highlight,
     stat_changes: choice.stat_changes || {},
     episode_end: episodeEnd,
     ending: null,

@@ -9,6 +9,7 @@ import { StatPanel } from "./StatPanel";
 import { ActionInput } from "./ActionInput";
 import StatChangeToast from "./StatChangeToast";
 import { SubtextPanel } from "./SubtextPanel";
+import HighlightQuote from "./HighlightQuote";
 
 export default function PlayScreen() {
   const {
@@ -27,6 +28,8 @@ export default function PlayScreen() {
     setLastNarration,
     recordChapter,
     autoSave,
+    // 金句高亮
+    pendingHighlight,
     // 潜台词系统
     pendingSubtext,
     isSubtextRevealed,
@@ -285,6 +288,16 @@ export default function PlayScreen() {
             text={streamingText || displayText}
             isStreaming={isLoading}
           />
+
+          {/* 金句高亮 */}
+          {pendingHighlight && !isLoading && (
+            <HighlightQuote
+              quote={pendingHighlight}
+              episode={gameState.currentEpisode}
+              section={gameState.currentSection}
+              playerName={gameState.playerProfile.fullName}
+            />
+          )}
 
           {/* 潜台词面板 */}
           {pendingSubtext && !isLoading && (

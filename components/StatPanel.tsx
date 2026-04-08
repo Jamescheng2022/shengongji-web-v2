@@ -32,6 +32,66 @@ const ALL_STATS = [
   { key: "usefulness" as const, label: "实用价值", icon: "💎", color: "#00BCD4" },
 ];
 
+
+
+// ========== 叙事化属性描述 ==========
+// 每个属性按阈值映射不同的文学描述
+
+type NarrativeMap = { threshold: number; desc: string }[];
+
+const STAT_NARRATIVES: Record<string, NarrativeMap> = {
+  favor: [
+    { threshold: 0,  desc: '形同陌路' },
+    { threshold: 15, desc: '略有耳闻' },
+    { threshold: 30, desc: '偶有关注' },
+    { threshold: 50, desc: '颇为留意' },
+    { threshold: 70, desc: '恩宠有加' },
+    { threshold: 85, desc: '独承雨露' },
+    { threshold: 95, desc: '三千宠爱' },
+  ],
+  san: [
+    { threshold: 0,  desc: '神志癫狂' },
+    { threshold: 15, desc: '风雨飘摇' },
+    { threshold: 30, desc: '心绪不宁' },
+    { threshold: 50, desc: '尚且清醒' },
+    { threshold: 70, desc: '心如止水' },
+    { threshold: 85, desc: '冰心玉壶' },
+  ],
+  dread: [
+    { threshold: 0,  desc: '无人在意' },
+    { threshold: 15, desc: '隐约生疑' },
+    { threshold: 30, desc: '暗自提防' },
+    { threshold: 50, desc: '如芒在背' },
+    { threshold: 70, desc: '功高震主' },
+    { threshold: 85, desc: '必欲除之' },
+    { threshold: 95, desc: '死期将至' },
+  ],
+  insight: [
+    { threshold: 0,  desc: '两眼一抹黑' },
+    { threshold: 3,  desc: '雾里看花' },
+    { threshold: 6,  desc: '初窥门径' },
+    { threshold: 10, desc: '洞若观火' },
+    { threshold: 15, desc: '明察秋毫' },
+  ],
+};
+
+const NARRATIVE_LABELS: Record<string, string> = {
+  favor: '圣眷',
+  san: '初心',
+  dread: '暗流',
+  insight: '慧眼',
+};
+
+function getNarrativeDesc(key: string, value: number): string | null {
+  const map = STAT_NARRATIVES[key];
+  if (!map) return null;
+  let desc = map[0].desc;
+  for (const entry of map) {
+    if (value >= entry.threshold) desc = entry.desc;
+  }
+  return desc;
+}
+
 export const StatPanel: React.FC<StatPanelProps> = ({ stats, rank, episode }) => {
   const [expanded, setExpanded] = React.useState(false);
   const displayStats = expanded ? ALL_STATS : CORE_STATS;
@@ -108,16 +168,28 @@ export const StatPanel: React.FC<StatPanelProps> = ({ stats, rank, episode }) =>
               <div key={cfg.key}>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                    <span>{cfg.icon}</span> {cfg.label}
+                    <span>{cfg.icon}</span> {!expanded && NARRATIVE_LABELS[cfg.key] ? NARRATIVE_LABELS[cfg.key] : cfg.label}
                   </span>
-                  <span 
-                    className="text-xs font-mono" 
-                    style={{ 
-                      color: cfg.key === "dread" && val >= 70 ? "#E74C3C" : "var(--text-primary)",
-                    }}
-                  >
-                    {val}
-                  </span>
+                  {!expanded && getNarrativeDesc(cfg.key, val) ? (
+                    <span 
+                      className="text-xs"
+                      style={{ 
+                        color: cfg.key === "dread" && val >= 70 ? "#E74C3C" : "var(--palace-gold)",
+                        fontFamily: "'Noto Serif SC', 'Source Han Serif SC', serif",
+                      }}
+                    >
+                      {getNarrativeDesc(cfg.key, val)}
+                    </span>
+                  ) : (
+                    <span 
+                      className="text-xs font-mono" 
+                      style={{ 
+                        color: cfg.key === "dread" && val >= 70 ? "#E74C3C" : "var(--text-primary)",
+                      }}
+                    >
+                      {val}
+                    </span>
+                  )}
                 </div>
                 <div
                   className="h-1 sm:h-1.5 rounded-full overflow-hidden"

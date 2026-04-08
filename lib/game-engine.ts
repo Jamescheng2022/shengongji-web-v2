@@ -187,6 +187,8 @@ export interface AIResponse {
   title?: string;
   /** 潜台词 - 当前NPC对话的真实意图，玩家可消耗洞察力解码 */
   subtext?: string;
+  /** 金句高亮 - 本段最具冲击力的一句话，用于截图分享 */
+  highlight?: string;
   /** 当前小节数（集内回合） */
   section?: number;
 }
@@ -652,6 +654,7 @@ function sanitizeAIResponse(response: AIResponse): AIResponse {
     // 设计文档新增：保留潜台词和章节标题
     subtext: response.subtext || undefined,
     title: response.title || undefined,
+    highlight: response.highlight || undefined,
   };
 }
 
