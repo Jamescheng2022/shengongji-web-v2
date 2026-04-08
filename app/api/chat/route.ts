@@ -1,4 +1,5 @@
 import { buildSystemPrompt, buildUserMessage, buildSystemPromptWithSummary } from '@/lib/prompts';
+import { validateAIOutput, buildCorrectionPrompt } from '@/lib/constitution';
 import { GameState, AIResponse, parseAIOutput, cleanNarration, getRecentSummaries, formatSummariesForPrompt } from '@/lib/game-engine';
 import { getCache, setCache } from '@/lib/prefetch-cache';
 import { 
@@ -98,7 +99,8 @@ export async function POST(req: Request) {
   }
 
   // ========== 构建系统Prompt（支持章节摘要）==========
-  let systemPrompt = buildSystemPrompt(gameState);
+  // 始终注入宪法约束块（通过 buildSystemPromptWithSummary）
+  let systemPrompt = buildSystemPromptWithSummary(gameState);
 
   // 从第5集开始注入章节摘要（提前至5集，原为11集）
   if (gameState.currentEpisode > 5 && gameState.chapterSummaries.length > 0) {
@@ -220,6 +222,81 @@ export async function POST(req: Request) {
     // 确保 narration 存在
     if (!aiResponse.narration) {
       aiResponse.narration = '（剧情生成中...）';
+    }
+
+    // ========== 宪法校验管道 ==========
+    const validation = validateAIOutput(aiResponse, gameState);
+    
+    if (validation.violations.length > 0) {
+      console.log('[CONSTITUTION] 检测到违规:', validation.level,
+        validation.violations.map(v => `[${v.rule}] ${v.detail}`));
+    }
+
+    // 红色违规：直接切 fallback（不可修复的严重违规）
+    if (validation.shouldFallback) {
+      console.log('[CONSTITUTION] 🔴 红色违规，切换到 fallback 引擎');
+      const fallbackResponse = generateFallbackStory(gameState, playerInput);
+      return new Response(JSON.stringify(fallbackResponse), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // 橙色违规：重试一次（带违规反馈让 AI 修正）
+    if (validation.shouldRetry) {
+      console.log('[CONSTITUTION] 🟠 橙色违规，重试中...');
+      try {
+        const correctionPrompt = buildCorrectionPrompt(validation.violations);
+        const retryResponse = await fetch(apiURL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userMessage },
+              { role: 'assistant', content: rawContent },
+              { role: 'user', content: correctionPrompt },
+            ],
+            max_tokens: 1200,
+            temperature: 0.7,  // 降温以提高遵从度
+            stream: false,
+          }),
+        });
+
+        if (retryResponse.ok) {
+          const retryData = await retryResponse.json();
+          const retryRaw = retryData.choices?.[0]?.message?.content || '';
+          console.log('[CONSTITUTION] Retry raw:', retryRaw.slice(0, 200));
+          
+          try {
+            const retryParsed = parseAIOutput(retryRaw);
+            // 对重试结果再做一次校验
+            const retryValidation = validateAIOutput(retryParsed, gameState);
+            
+            if (retryValidation.shouldFallback) {
+              // 重试后仍然红色违规，切 fallback
+              console.log('[CONSTITUTION] 🔴 重试后仍红色违规，切 fallback');
+              const fallbackResponse = generateFallbackStory(gameState, playerInput);
+              return new Response(JSON.stringify(fallbackResponse), {
+                headers: { 'Content-Type': 'application/json' },
+              });
+            }
+            
+            // 重试成功（即使还有黄色违规也放行）
+            console.log('[CONSTITUTION] ✅ 重试后校验通过，级别:', retryValidation.level);
+            aiResponse = retryParsed;
+          } catch (retryParseErr) {
+            console.error('[CONSTITUTION] 重试结果解析失败，使用原始输出');
+            // 保持原始 aiResponse
+          }
+        }
+      } catch (retryErr) {
+        console.error('[CONSTITUTION] 重试请求失败:', retryErr);
+        // 保持原始 aiResponse
+      }
     }
 
     console.log('[chat] Success, narration length:', aiResponse.narration.length, 'choices:', aiResponse.choices.length);

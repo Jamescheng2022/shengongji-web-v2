@@ -1,4 +1,5 @@
 import type { GameState, ChapterSummary, StoryEntry } from './game-engine';
+import { buildConstitutionBlock } from './constitution';
 import { ORIGIN_OPTIONS, PERSONALITY_OPTIONS } from './game-engine';
 
 /**
@@ -452,13 +453,13 @@ export function parseSummaryResponse(raw: string): SummaryResponse {
  */
 export function buildSystemPromptWithSummary(state: GameState, summaryText?: string): string {
   const basePrompt = buildSystemPrompt(state);
+  const constitutionBlock = buildConstitutionBlock(state);
 
-  if (!summaryText) {
-    return basePrompt;
+  const parts = [basePrompt, constitutionBlock];
+  if (summaryText) {
+    parts.push(summaryText);
   }
 
-  return `${basePrompt}
-
-${summaryText}`;
+  return parts.join('\n\n');
 }
 
