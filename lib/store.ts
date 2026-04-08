@@ -4,12 +4,16 @@ import {
   type AIResponse,
   type StoryEntry,
   type PlayerProfile,
+  type ChapterSummary,
   createNewGame,
   processAIResponse,
+  applyStatChanges,
   addChapter,
+  addChapterSummary,
   rewindToChapter,
   canFreeRewind,
   useFreeRewind,
+  shouldGenerateSummary,
   saveSave,
   getAllSaves,
   deleteSave,
@@ -25,11 +29,15 @@ interface GameStore {
   // 游戏状态
   gameState: GameState | null;
   isLoading: boolean;
-  currentChoices: { id: number; text: string }[];
+  currentChoices: { id: number; text: string; stat_changes?: Partial<GameState['stats']> }[];
   streamingText: string;
   statChanges: Partial<GameState['stats']> | null;
   lastNarration: string;  // 最近一次AI返回的剧情文本（用于记录章节）
   lastStatChanges: Partial<GameState['stats']>;  // 最近一次属性变化（用于记录章节）
+
+  // 潜台词系统
+  pendingSubtext: string;  // 待解码的潜台词
+  isSubtextRevealed: boolean;  // 潜台词是否已解锁
 
   // 存档
   saves: GameState[];
@@ -45,12 +53,18 @@ interface GameStore {
   setStreamingText: (text: string) => void;
   applyAIResponse: (response: AIResponse) => void;
   setLoading: (loading: boolean) => void;
-  setChoices: (choices: { id: number; text: string }[]) => void;
+  setChoices: (choices: { id: number; text: string; stat_changes?: Partial<GameState['stats']> }[]) => void;
   setStatChanges: (changes: Partial<GameState['stats']> | null) => void;
   setLastNarration: (text: string) => void;
 
+  // 潜台词解码
+  revealSubtext: () => void;  // 消耗洞察力，解锁潜台词
+
   // 宫册·章节记录
   recordChapter: (playerChoice: string, availableChoices: { id: number; text: string }[]) => void;
+
+  // 章节摘要生成
+  generateChapterSummary: () => Promise<void>;  // 调用API生成章节摘要
 
   // 改命·回退
   rewindToChapter: (chapterId: string) => void;
@@ -70,6 +84,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
   statChanges: null,
   lastNarration: '',
   lastStatChanges: {},
+  // 潜台词系统
+  pendingSubtext: '',
+  isSubtextRevealed: false,
   saves: [],
 
   startNewGame: (profile) => {
@@ -83,6 +100,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       statChanges: null,
       lastNarration: '',
       lastStatChanges: {},
+      pendingSubtext: '',
+      isSubtextRevealed: false,
     });
   },
 
@@ -95,6 +114,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       statChanges: null,
       lastNarration: save.pendingNarration || '',
       lastStatChanges: save.pendingStatChanges || {},
+      pendingSubtext: save.pendingSubtext || '',
+      isSubtextRevealed: false, // 读档后重置潜台词显示状态
     });
   },
 
@@ -150,6 +171,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       isLoading: false,
       lastNarration: response.narration,
       lastStatChanges: response.stat_changes,
+      // 潜台词系统
+      pendingSubtext: response.subtext || '',
+      isSubtextRevealed: false, // 新剧情默认隐藏潜台词
     });
 
     // 如果有结局，跳转结局页
@@ -161,6 +185,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setLoading: (loading) => set({ isLoading: loading }),
   setChoices: (choices) => set({ currentChoices: choices }),
   setStatChanges: (changes) => set({ statChanges: changes }),
+
+  // ====== 潜台词解码 ======
+  revealSubtext: () => {
+    const { gameState, isSubtextRevealed } = get();
+    if (!gameState || isSubtextRevealed || !gameState.stats.insight) return;
+    if (gameState.stats.insight < 1) return; // 需要1点洞察力
+
+    // 消耗1点洞察力
+    const newStats = applyStatChanges(gameState.stats, { insight: -1 });
+    const updatedState = { ...gameState, stats: newStats };
+    saveSave(updatedState);
+
+    set({
+      gameState: updatedState,
+      isSubtextRevealed: true, // 解锁潜台词
+      statChanges: { insight: -1 },
+    });
+  },
 
   // ====== 宫册·记录章节 ======
   recordChapter: (playerChoice, availableChoices) => {
@@ -208,6 +250,50 @@ export const useGameStore = create<GameStore>((set, get) => ({
       statChanges: null,
       isLoading: false,
     });
+  },
+
+  // ====== 章节摘要生成 ======
+  generateChapterSummary: async () => {
+    const { gameState } = get();
+    if (!gameState) return;
+
+    // 检查是否需要生成摘要
+    if (!shouldGenerateSummary(gameState)) {
+      console.log('[store] Not at summary point, skipping');
+      return;
+    }
+
+    // 第11集之后才生成摘要（之前用固定剧本）
+    if (gameState.currentEpisode <= 10) {
+      console.log('[store] Episode <= 10, skipping summary');
+      return;
+    }
+
+    console.log('[store] Generating chapter summary for episode', gameState.currentEpisode);
+
+    try {
+      const response = await fetch('/api/summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gameState }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.summary) {
+        const updatedState = {
+          ...gameState,
+          chapterSummaries: [...gameState.chapterSummaries, data.summary].slice(-10),
+        };
+        saveSave(updatedState);
+        set({ gameState: updatedState });
+        console.log('[store] Chapter summary generated successfully');
+      } else if (data.skipped) {
+        console.log('[store] Summary skipped:', data.reason);
+      }
+    } catch (e) {
+      console.error('[store] Failed to generate summary:', e);
+    }
   },
 
   autoSave: () => {

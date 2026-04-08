@@ -1,6 +1,12 @@
-import { buildSystemPrompt, buildUserMessage } from '@/lib/prompts';
-import { GameState, AIResponse, parseAIOutput, cleanNarration } from '@/lib/game-engine';
+import { buildSystemPrompt, buildUserMessage, buildSystemPromptWithSummary } from '@/lib/prompts';
+import { GameState, AIResponse, parseAIOutput, cleanNarration, getRecentSummaries, formatSummariesForPrompt } from '@/lib/game-engine';
 import { getCache, setCache } from '@/lib/prefetch-cache';
+import { 
+  shouldUseFixedScript, 
+  getNextSceneId,
+  FIXED_SCENES,
+  EP_FLOWS
+} from '@/lib/fixed-script';
 
 export async function POST(req: Request) {
   let gameState: GameState;
@@ -15,6 +21,62 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ error: 'Invalid request body' }), { status: 400 });
   }
 
+  // ========== 检查是否使用固定剧本（前十集） ==========
+  if (shouldUseFixedScript(gameState.currentEpisode)) {
+    console.log('[chat] Using fixed script for episode', gameState.currentEpisode);
+    
+    // 获取当前场景
+    const flowKey = `ep${gameState.currentEpisode}_flow`;
+    const flow = EP_FLOWS[flowKey];
+    
+    if (flow) {
+      const sceneIndex = (gameState.currentSection || 1) - 1;
+      const currentSceneId = flow[sceneIndex];
+      const currentScene = FIXED_SCENES[currentSceneId];
+      
+      if (currentScene) {
+        // 找到玩家选择的选项
+        const choice = currentScene.choices.find(c => c.text === playerInput);
+        const fallbackChoice = currentScene.choices[0];
+        const selectedChoice = choice || fallbackChoice;
+        
+        // 生成下一场景
+        const nextSceneId = getNextSceneId(currentSceneId, selectedChoice?.id || 1);
+        const nextScene = nextSceneId ? FIXED_SCENES[nextSceneId] : null;
+        
+        // 确定是否结束当前集
+        const currentSection = gameState.currentSection || 1;
+        const episodeEnd = currentSection >= 3 || currentScene.id.includes('_s3');
+        // 返回下一节的 section（processAIResponse 需要这个值来递增）
+        const nextSection = episodeEnd ? 1 : currentSection + 1;
+        
+        // 转换为AI响应格式
+        const response: AIResponse = {
+          title: currentScene.title,
+          section: nextSection,
+          narration: currentScene.narration,
+          subtext: currentScene.subtext,
+          stat_changes: selectedChoice?.stat_changes || {},
+          choices: (nextScene || currentScene).choices.map((c, i) => ({
+            id: i + 1,
+            text: c.text,
+            stat_changes: c.stat_changes,
+          })),
+          episode_end: episodeEnd,
+          ending: null,
+        };
+        
+        // 缓存响应
+        const cacheKey = `${gameState.id}_${playerInput}`;
+        setCache(cacheKey, response);
+        
+        return new Response(JSON.stringify(response), {
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+    }
+  }
+
   // 1. 检查缓存
   const cacheKey = `${gameState.id}_${playerInput}`;
   const cachedResult = getCache(cacheKey);
@@ -25,7 +87,19 @@ export async function POST(req: Request) {
     });
   }
 
-  const systemPrompt = buildSystemPrompt(gameState);
+  // ========== 构建系统Prompt（支持章节摘要）==========
+  let systemPrompt = buildSystemPrompt(gameState);
+
+  // 在第11集之后，如果有章节摘要，注入到Prompt中
+  if (gameState.currentEpisode > 10 && gameState.chapterSummaries.length > 0) {
+    const recentSummaries = getRecentSummaries(gameState, 2);
+    const summaryText = formatSummariesForPrompt(recentSummaries);
+    if (summaryText) {
+      systemPrompt = buildSystemPromptWithSummary(gameState, summaryText);
+      console.log('[chat] Injected', recentSummaries.length, 'chapter summaries into prompt');
+    }
+  }
+
   const userMessage = buildUserMessage(gameState, playerInput);
 
   // API Key 优先级：ZHIPU > OPENROUTER > AI_API_KEY
@@ -113,6 +187,9 @@ export async function POST(req: Request) {
         stat_changes: {},
         episode_end: false,
         ending: null,
+        // 设计文档新增字段
+        subtext: undefined,
+        title: undefined,
       };
     }
 

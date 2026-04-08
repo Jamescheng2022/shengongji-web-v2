@@ -12,6 +12,12 @@ const STAT_LABELS: Record<string, string> = {
   wisdom: "智慧",
   virtue: "德行",
   cruelty: "狠毒",
+  // 设计文档新增
+  san: "理智",
+  freshness: "新鲜感",
+  usefulness: "实用价值",
+  dread: "忌惮",
+  insight: "洞察",
 };
 
 interface StatChangeToastProps {

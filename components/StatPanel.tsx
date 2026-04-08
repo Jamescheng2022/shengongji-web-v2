@@ -13,26 +13,52 @@ interface StatPanelProps {
 // 只展示 4 个核心属性（产品设计要求简化）
 const CORE_STATS = [
   { key: "favor" as const, label: "宠爱", icon: "❤️", color: "#E74C3C" },
-  { key: "health" as const, label: "健康", icon: "💚", color: "#27AE60" },
-  { key: "influence" as const, label: "势力", icon: "👑", color: "#2980B9" },
-  { key: "silver" as const, label: "银两", icon: "🪙", color: "#D4AF37" },
+  { key: "san" as const, label: "理智", icon: "🧠", color: "#9B59B6" },
+  { key: "dread" as const, label: "忌惮", icon: "⚠️", color: "#C0392B" },
+  { key: "insight" as const, label: "洞察", icon: "🔮", color: "#F39C12" },
 ];
 
 const ALL_STATS = [
   ...CORE_STATS,
+  { key: "health" as const, label: "健康", icon: "💚", color: "#27AE60" },
+  { key: "influence" as const, label: "势力", icon: "👑", color: "#2980B9" },
+  { key: "silver" as const, label: "银两", icon: "🪙", color: "#D4AF37" },
   { key: "scheming" as const, label: "心机", icon: "◆", color: "#9B59B6" },
   { key: "wisdom" as const, label: "智慧", icon: "✦", color: "#F39C12" },
   { key: "virtue" as const, label: "德行", icon: "☯", color: "#1ABC9C" },
   { key: "cruelty" as const, label: "狠毒", icon: "✕", color: "#C0392B" },
+  // 设计文档新增三维帝王恩宠
+  { key: "freshness" as const, label: "新鲜感", icon: "✨", color: "#E91E63" },
+  { key: "usefulness" as const, label: "实用价值", icon: "💎", color: "#00BCD4" },
 ];
 
 export const StatPanel: React.FC<StatPanelProps> = ({ stats, rank, episode }) => {
   const [expanded, setExpanded] = React.useState(false);
   const displayStats = expanded ? ALL_STATS : CORE_STATS;
+  
+  // 设计文档：理智警告和忌惮警告
+  const sanWarning = stats.san <= 30;
+  const dreadWarning = stats.dread >= 70;
 
   return (
     <div className="px-3 sm:px-4 md:px-8 py-3 sm:py-4" style={{ background: "var(--bg-card)" }}>
       <div className="max-w-2xl mx-auto">
+        {/* 危机警告 */}
+        {(sanWarning || dreadWarning) && (
+          <div 
+            className="mb-3 p-2 rounded text-xs text-center animate-pulse"
+            style={{ 
+              background: sanWarning ? "rgba(139,37,0,0.3)" : "rgba(192,57,43,0.3)",
+              border: `1px solid ${sanWarning ? "#8B2500" : "#C0392B"}`,
+              color: "#F5E6C8",
+            }}
+          >
+            {sanWarning && "⚠️ 理智恍惚，你感到精神濒临崩溃..."}
+            {sanWarning && dreadWarning && " | "}
+            {dreadWarning && "⚠️ 帝王忌惮日深，危机四伏！"}
+          </div>
+        )}
+        
         {/* 位份与集数 */}
         <div className="flex items-center justify-between mb-3">
           <div>
@@ -84,7 +110,12 @@ export const StatPanel: React.FC<StatPanelProps> = ({ stats, rank, episode }) =>
                   <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
                     <span>{cfg.icon}</span> {cfg.label}
                   </span>
-                  <span className="text-xs font-mono" style={{ color: "var(--text-primary)" }}>
+                  <span 
+                    className="text-xs font-mono" 
+                    style={{ 
+                      color: cfg.key === "dread" && val >= 70 ? "#E74C3C" : "var(--text-primary)",
+                    }}
+                  >
                     {val}
                   </span>
                 </div>

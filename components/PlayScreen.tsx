@@ -8,6 +8,7 @@ import { StoryViewer } from "./StoryViewer";
 import { StatPanel } from "./StatPanel";
 import { ActionInput } from "./ActionInput";
 import StatChangeToast from "./StatChangeToast";
+import { SubtextPanel } from "./SubtextPanel";
 
 export default function PlayScreen() {
   const {
@@ -26,6 +27,10 @@ export default function PlayScreen() {
     setLastNarration,
     recordChapter,
     autoSave,
+    // 潜台词系统
+    pendingSubtext,
+    isSubtextRevealed,
+    revealSubtext,
   } = useGameStore();
 
   const [showStats, setShowStats] = useState(false);
@@ -176,6 +181,12 @@ export default function PlayScreen() {
         pendingChoicesRef.current = aiResponse.choices;
         applyAIResponse(aiResponse);
 
+        // 章节摘要生成：每3节自动生成一次（后台调用，不阻塞UI）
+        const stateAfterApply = useGameStore.getState().gameState;
+        if (stateAfterApply && stateAfterApply.currentSection % 3 === 0 && stateAfterApply.currentEpisode > 10) {
+          useGameStore.getState().generateChapterSummary().catch(console.error);
+        }
+
         // 预生成加速：并行预取后续三个选项 (使用更新后的状态)
         const updatedState = useGameStore.getState().gameState;
         if (updatedState && aiResponse.choices && aiResponse.choices.length > 0) {
@@ -217,7 +228,7 @@ export default function PlayScreen() {
           </button>
           <div className="w-px h-3" style={{ background: "var(--border-gold)" }} />
           <span className="text-xs sm:text-sm shrink-0" style={{ color: "var(--text-gold)" }}>
-            第{gameState.currentEpisode}集
+            第{gameState.currentEpisode}集 · 第{gameState.currentSection}节
           </span>
         </div>
 
@@ -275,6 +286,16 @@ export default function PlayScreen() {
             isStreaming={isLoading}
           />
 
+          {/* 潜台词面板 */}
+          {pendingSubtext && !isLoading && (
+            <SubtextPanel
+              subtext={pendingSubtext}
+              isRevealed={isSubtextRevealed}
+              insight={gameState.stats.insight}
+              onReveal={revealSubtext}
+            />
+          )}
+
           {/* 加载提示 */}
           {isLoading && !streamingText && (
             <div className="text-center py-8 text-sm" style={{ color: "var(--text-secondary)" }}>
@@ -286,7 +307,12 @@ export default function PlayScreen() {
           {!isLoading && currentChoices.length > 0 && (
             <div className="mt-6 sm:mt-8 mb-4 safe-bottom">
               <div className="divider-gold mb-4 sm:mb-6" />
-              <ActionInput onAction={handleAction} options={currentChoices} disabled={isLoading} />
+              <ActionInput 
+                onAction={handleAction} 
+                options={currentChoices} 
+                disabled={isLoading}
+                currentEpisode={gameState.currentEpisode}
+              />
             </div>
           )}
         </div>
