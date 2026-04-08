@@ -562,7 +562,7 @@ export function formatSummariesForPrompt(summaries: ChapterSummary[]): string {
 
   const formatted = summaries.map(s => {
     const npcRelationsText = Object.entries(s.npcRelations)
-      .map(([name, relation]) => `${name}（${relation === 'friend' ? '友善' : relation === 'enemy' ? '敌对' : '中立' === 'unknown' ? '未知' : '中立'}）`)
+      .map(([name, relation]) => `${name}（${relation === 'friend' ? '友善' : relation === 'enemy' ? '敌对' : '中立'}）`)
       .join('、');
 
     return `【第${s.episodeRange[0]}-${s.episodeRange[1]}集剧情摘要】

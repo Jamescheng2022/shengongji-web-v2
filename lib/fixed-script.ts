@@ -1,4 +1,4 @@
-// =============================================
+﻿// =============================================
 // 深宫纪 - 前十集固定剧本系统
 // =============================================
 
@@ -20,6 +20,7 @@ export interface FixedScene {
   // 特殊标记
   requires_insight?: boolean; // 是否需要洞察力选项
   leads_to?: string; // 下一场景ID（用于分支）
+  episode_end?: boolean; // 第十集结束
 }
 
 // ========== 固定剧本剧情节点 ==========
@@ -56,9 +57,9 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
         id: 3, 
         text: '消耗1点洞察力，解读乌兰的潜台词（深入分析局势，消耗心神）', 
         stat_changes: { insight: 2, san: -2, scheming: 2 },
-        requires_insight: true 
       },
     ],
+    requires_insight: true,
     subtext: '乌兰在试探你的底细，看你是软弱可欺还是不好惹。退让会被轻视，回击会树敌。',
   },
 
@@ -84,7 +85,7 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 2, 
         text: '等其他人抢完再上前（明哲保身，但被视为怯懦偷懒）', 
-        stat_changes: { scheming: 5, sanity: 5, favor: -5, insight: -2 } 
+        stat_changes: { scheming: 5, san: 5, favor: -5, insight: -2 } 
       },
       { 
         id: 3, 
@@ -139,12 +140,12 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 1, 
         text: '热情接待，与她结交（建立人脉，但可能被利用）', 
-        stat_changes: { influence: 5, favor: 5, insight: 3, sanity: -3, dread: -2 } 
+        stat_changes: { influence: 5, favor: 5, insight: 3, san: -3, dread: -2 } 
       },
       { 
         id: 2, 
         text: '客气敷衍，保持距离（明哲保身，但错失盟友机会）', 
-        stat_changes: { scheming: 5, sanity: 3, favor: -3, influence: -5, virtue: 2 } 
+        stat_changes: { scheming: 5, san: 3, favor: -3, influence: -5, virtue: 2 } 
       },
       { 
         id: 3, 
@@ -171,7 +172,7 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 1, 
         text: '选择修习茶艺（实用价值高，但需耗费大量心神研习）', 
-        stat_changes: { usefulness: 10, insight: 5, favor: 5, sanity: -5, virtue: -2 } 
+        stat_changes: { usefulness: 10, insight: 5, favor: 5, san: -5, virtue: -2 } 
       },
       { 
         id: 2, 
@@ -201,7 +202,7 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 1, 
         text: '忍下这口气，自己去换衣裳（保全颜面，但恐被视为软弱）', 
-        stat_changes: { sanity: -3, virtue: 5, favor: -5, insight: 3, scheming: 2 } 
+        stat_changes: { san: -3, virtue: 5, favor: -5, insight: 3, scheming: 2 } 
       },
       { 
         id: 2, 
@@ -231,17 +232,17 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 1, 
         text: '精心准备茶艺表演，献茶祝寿（赢得太后青睐，但耗费心神且引人注目）', 
-        stat_changes: { usefulness: 8, favor: 8, insight: 3, sanity: -8, dread: 3 } 
+        stat_changes: { usefulness: 8, favor: 8, insight: 3, san: -8, dread: 3 } 
       },
       { 
         id: 2, 
         text: '低调行事，准备一份绣品即可（稳扎稳打，但错失出风头的机会）', 
-        stat_changes: { virtue: 8, favor: 3, insight: 2, sanity: 5, usefulness: -5 } 
+        stat_changes: { virtue: 8, favor: 3, insight: 2, san: 5, usefulness: -5 } 
       },
       { 
         id: 3, 
         text: '暗中调查乌兰的准备，寻找破绽（心机深沉，但耗费心神且有风险）', 
-        stat_changes: { scheming: 8, insight: 5, cruelty: 5, sanity: -5, favor: -2 } 
+        stat_changes: { scheming: 8, insight: 5, cruelty: 5, san: -5, favor: -2 } 
       },
     ],
     leads_to: 'ep3_s1',
@@ -263,7 +264,7 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 1, 
         text: '跪下行礼，自报家门（规矩得体，但错失展示才艺的机会）', 
-        stat_changes: { favor: 5, virtue: 5, insight: 3, freshness: -5, sanity: -2 } 
+        stat_changes: { favor: 5, virtue: 5, insight: 3, freshness: -5, san: -2 } 
       },
       { 
         id: 2, 
@@ -323,7 +324,7 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 1, 
         text: '向嬷嬷打听乌兰的底细（知己知彼，但耗费心力）', 
-        stat_changes: { insight: 8, scheming: 5, favor: 0, sanity: -3, virtue: -2 } 
+        stat_changes: { insight: 8, scheming: 5, favor: 0, san: -3, virtue: -2 } 
       },
       { 
         id: 2, 
@@ -333,7 +334,7 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 3, 
         text: '加强防备，静观其变（谨慎多疑，但耗费心神）', 
-        stat_changes: { scheming: 8, insight: 5, sanity: -5, cruelty: 5, favor: -2 } 
+        stat_changes: { scheming: 8, insight: 5, san: -5, cruelty: 5, favor: -2 } 
       },
     ],
     leads_to: 'ep4_s1',
@@ -360,12 +361,12 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 2, 
         text: '暗中打探乌兰侍寝的情况和皇帝喜好（心机深沉，但耗费精力）', 
-        stat_changes: { scheming: 8, insight: 5, cruelty: 3, favor: -2, sanity: -3 } 
+        stat_changes: { scheming: 8, insight: 5, cruelty: 3, favor: -2, san: -3 } 
       },
       { 
         id: 3, 
         text: '静心准备，不动声色（心态平稳，但可能错失情报）', 
-        stat_changes: { sanity: 5, virtue: 5, favor: 2, insight: -3, scheming: -2 } 
+        stat_changes: { san: 5, virtue: 5, favor: 2, insight: -3, scheming: -2 } 
       },
     ],
   },
@@ -387,7 +388,7 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 1, 
         text: '谦逊应答，不敢多言（稳妥保守，但难讨圣眷）', 
-        stat_changes: { favor: 3, virtue: 5, freshness: -8, insight: 3, sanity: 2 } 
+        stat_changes: { favor: 3, virtue: 5, freshness: -8, insight: 3, san: 2 } 
       },
       { 
         id: 2, 
@@ -397,7 +398,7 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 3, 
         text: '谨慎试探皇帝的喜好和心思（洞察人心，但显得刻意）', 
-        stat_changes: { insight: 8, scheming: 5, favor: 2, cruelty: 2, sanity: -3 } 
+        stat_changes: { insight: 8, scheming: 5, favor: 2, cruelty: 2, san: -3 } 
       },
     ],
   },
@@ -417,17 +418,17 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 1, 
         text: '精心准备，恭敬地去拜见皇后（赢得皇后好感，但耗时耗神）', 
-        stat_changes: { favor: 8, virtue: 5, insight: 3, sanity: -5, freshness: -3 } 
+        stat_changes: { favor: 8, virtue: 5, insight: 3, san: -5, freshness: -3 } 
       },
       { 
         id: 2, 
         text: '低调行事，尽量不引人注目（韬光养晦，但错失表现机会）', 
-        stat_changes: { scheming: 5, favor: 2, sanity: 5, insight: -3, virtue: -2 } 
+        stat_changes: { scheming: 5, favor: 2, san: 5, insight: -3, virtue: -2 } 
       },
       { 
         id: 3, 
         text: '趁机观察皇后与其他妃嫔的关系（获取情报，但耗费心神）', 
-        stat_changes: { insight: 8, scheming: 5, favor: -5, sanity: -3, cruelty: 3 } 
+        stat_changes: { insight: 8, scheming: 5, favor: -5, san: -3, cruelty: 3 } 
       },
     ],
     leads_to: 'ep5_s1',
@@ -449,7 +450,7 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 1, 
         text: '保持低调，不引人注目（韬光养晦，但错失讨好皇后的机会）', 
-        stat_changes: { scheming: 5, favor: -3, insight: 3, virtue: 2, sanity: 3 } 
+        stat_changes: { scheming: 5, favor: -3, insight: 3, virtue: 2, san: 3 } 
       },
       { 
         id: 2, 
@@ -459,7 +460,7 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 3, 
         text: '暗中观察皇后与乌兰的微妙关系（洞察局势，但耗费心神）', 
-        stat_changes: { insight: 8, scheming: 5, favor: -3, sanity: -3, cruelty: 2 } 
+        stat_changes: { insight: 8, scheming: 5, favor: -3, san: -3, cruelty: 2 } 
       },
     ],
   },
@@ -479,17 +480,17 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 1, 
         text: '欣然前往拜见华妃（拓展人脉，但得罪皇后且耗费时间精力）', 
-        stat_changes: { favor: 5, usefulness: 5, insight: 3, sanity: -5, virtue: -3, dread: -3 } 
+        stat_changes: { favor: 5, usefulness: 5, insight: 3, san: -5, virtue: -3, dread: -3 } 
       },
       { 
         id: 2, 
         text: '婉拒华妃，称身体不适需要休息（明哲保身，但错失机会且得罪华妃）', 
-        stat_changes: { scheming: 3, favor: -5, sanity: 5, virtue: 2, insight: -2 } 
+        stat_changes: { scheming: 3, favor: -5, san: 5, virtue: 2, insight: -2 } 
       },
       { 
         id: 3, 
         text: '先打探华妃的性情再做决定（谨慎行事，但耗费时间精力）', 
-        stat_changes: { insight: 8, scheming: 5, favor: 0, sanity: -3, virtue: -2 } 
+        stat_changes: { insight: 8, scheming: 5, favor: 0, san: -3, virtue: -2 } 
       },
     ],
   },
@@ -519,7 +520,7 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 3, 
         text: '替乌兰说好话，化解恩怨（展现大度，但可能被华妃轻视）', 
-        stat_changes: { virtue: 8, favor: -5, insight: 3, sanity: 3, cruelty: -3 } 
+        stat_changes: { virtue: 8, favor: -5, insight: 3, san: 3, cruelty: -3 } 
       },
     ],
     leads_to: 'ep6_s1',
@@ -541,7 +542,7 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 1, 
         text: '欣然接受结盟（获得盟友，但可能被利用卷入是非）', 
-        stat_changes: { influence: 8, favor: 3, insight: 3, scheming: 2, sanity: -3, dread: -2 } 
+        stat_changes: { influence: 8, favor: 3, insight: 3, scheming: 2, san: -3, dread: -2 } 
       },
       { 
         id: 2, 
@@ -551,7 +552,7 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 3, 
         text: '试探淑嫔结盟的真正目的（洞察人心，但耗费心神）', 
-        stat_changes: { insight: 8, scheming: 5, favor: -2, sanity: -5, cruelty: 3 } 
+        stat_changes: { insight: 8, scheming: 5, favor: -2, san: -5, cruelty: 3 } 
       },
     ],
   },
@@ -571,7 +572,7 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 1, 
         text: '谦虚推辞，说不敢与格格比试（谦逊得体，但错失表现机会）', 
-        stat_changes: { virtue: 5, favor: 2, insight: 2, sanity: 3, freshness: -5, usefulness: -3 } 
+        stat_changes: { virtue: 5, favor: 2, insight: 2, san: 3, freshness: -5, usefulness: -3 } 
       },
       { 
         id: 2, 
@@ -581,7 +582,7 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 3, 
         text: '提议比试茶艺与舞蹈结合，各展所长（创意巧妙，但耗费精力）', 
-        stat_changes: { wisdom: 8, insight: 8, scheming: 5, favor: 3, sanity: -8, dread: 5 } 
+        stat_changes: { wisdom: 8, insight: 8, scheming: 5, favor: 3, san: -8, dread: 5 } 
       },
     ],
   },
@@ -611,7 +612,7 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 3, 
         text: '静观各方反应，分析局势（洞察人心，但耗费心神）', 
-        stat_changes: { insight: 10, scheming: 8, favor: -3, sanity: -5, cruelty: 3 } 
+        stat_changes: { insight: 10, scheming: 8, favor: -3, san: -5, cruelty: 3 } 
       },
     ],
     leads_to: 'ep7_s1',
@@ -633,12 +634,12 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 1, 
         text: '主动与绮罗交好，拓展人脉（借势上位，但卷入派系斗争）', 
-        stat_changes: { influence: 8, favor: 3, insight: 3, scheming: 2, sanity: -3, dread: 3 } 
+        stat_changes: { influence: 8, favor: 3, insight: 3, scheming: 2, san: -3, dread: 3 } 
       },
       { 
         id: 2, 
         text: '静观其变，看看乌兰和绮罗的关系发展（明哲保身，但错失先机）', 
-        stat_changes: { insight: 8, scheming: 5, favor: -2, influence: -3, sanity: 3, virtue: 2 } 
+        stat_changes: { insight: 8, scheming: 5, favor: -2, influence: -3, san: 3, virtue: 2 } 
       },
       { 
         id: 3, 
@@ -693,12 +694,12 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 1, 
         text: '请求皇帝明察，还自己清白（诉诸权威，但显得依赖他人）', 
-        stat_changes: { favor: 3, virtue: 5, insight: 3, sanity: -8, cruelty: -3, scheming: 2 } 
+        stat_changes: { favor: 3, virtue: 5, insight: 3, san: -8, cruelty: -3, scheming: 2 } 
       },
       { 
         id: 2, 
         text: '冷静分析，指出证据的漏洞（沉着应对，但耗费心神）', 
-        stat_changes: { wisdom: 8, insight: 8, scheming: 5, favor: 2, sanity: -8, virtue: -2 } 
+        stat_changes: { wisdom: 8, insight: 8, scheming: 5, favor: 2, san: -8, virtue: -2 } 
       },
       { 
         id: 3, 
@@ -730,12 +731,12 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 2, 
         text: '趁机追查陷害自己的幕后黑手（斩草除根，但耗费心神且树敌）', 
-        stat_changes: { insight: 8, scheming: 8, cruelty: 5, favor: 2, sanity: -5, virtue: -3 } 
+        stat_changes: { insight: 8, scheming: 8, cruelty: 5, favor: 2, san: -5, virtue: -3 } 
       },
       { 
         id: 3, 
         text: '低调行事，不再追究（韬光养晦，但纵容恶人）', 
-        stat_changes: { virtue: 5, favor: 2, sanity: 5, insight: -3, cruelty: -3, influence: -3 } 
+        stat_changes: { virtue: 5, favor: 2, san: 5, insight: -3, cruelty: -3, influence: -3 } 
       },
     ],
   },
@@ -760,7 +761,7 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 2, 
         text: '谦逊退让，不因此事而骄傲（谦逊得体，但错失机会）', 
-        stat_changes: { virtue: 8, favor: 5, insight: 3, sanity: 5, freshness: -5, dread: -3 } 
+        stat_changes: { virtue: 8, favor: 5, insight: 3, san: 5, freshness: -5, dread: -3 } 
       },
       { 
         id: 3, 
@@ -785,17 +786,17 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 1, 
         text: '精心准备寿礼，力求惊艳全场（争取表现，但耗费心神且招忌）', 
-        stat_changes: { usefulness: 10, freshness: 8, favor: 5, sanity: -8, dread: 8, insight: 2 } 
+        stat_changes: { usefulness: 10, freshness: 8, favor: 5, san: -8, dread: 8, insight: 2 } 
       },
       { 
         id: 2, 
         text: '稳扎稳打，准备一份心意即可（稳妥保守，但错失出风头的机会）', 
-        stat_changes: { virtue: 8, favor: 3, insight: 3, sanity: 5, usefulness: -5, freshness: -3 } 
+        stat_changes: { virtue: 8, favor: 3, insight: 3, san: 5, usefulness: -5, freshness: -3 } 
       },
       { 
         id: 3, 
         text: '暗中调查其他妃嫔的准备内容（知己知彼，但耗费心神且有风险）', 
-        stat_changes: { insight: 10, scheming: 8, cruelty: 3, favor: -3, sanity: -5, virtue: -2 } 
+        stat_changes: { insight: 10, scheming: 8, cruelty: 3, favor: -3, san: -5, virtue: -2 } 
       },
     ],
     leads_to: 'ep9_s1',
@@ -817,7 +818,7 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 1, 
         text: '等乌兰表演完再上前，保持镇定（沉稳持重，但错失先机）', 
-        stat_changes: { virtue: 5, insight: 3, favor: -3, freshness: -5, sanity: 3, cruelty: -2 } 
+        stat_changes: { virtue: 5, insight: 3, favor: -3, freshness: -5, san: 3, cruelty: -2 } 
       },
       { 
         id: 2, 
@@ -827,7 +828,7 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 3, 
         text: '观察皇帝和太后的反应后再做决定（审时度势，但显得犹豫）', 
-        stat_changes: { insight: 10, scheming: 5, favor: -2, sanity: -3, virtue: 2, cruelty: 2 } 
+        stat_changes: { insight: 10, scheming: 5, favor: -2, san: -3, virtue: 2, cruelty: 2 } 
       },
     ],
   },
@@ -852,7 +853,7 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 2, 
         text: '谦逊推辞，说自己才疏学浅（低调保身，但得罪太后）', 
-        stat_changes: { virtue: 5, favor: -8, insight: 3, sanity: 5, usefulness: -5, dread: -5 } 
+        stat_changes: { virtue: 5, favor: -8, insight: 3, san: 5, usefulness: -5, dread: -5 } 
       },
       { 
         id: 3, 
@@ -887,7 +888,7 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 3, 
         text: '低调行事，避免引起更多敌意（韬光养晦，但错失主动权）', 
-        stat_changes: { virtue: 5, favor: 3, insight: 3, sanity: 5, influence: -5, freshness: -3 } 
+        stat_changes: { virtue: 5, favor: 3, insight: 3, san: 5, influence: -5, freshness: -3 } 
       },
     ],
     leads_to: 'ep10_s1',
@@ -909,17 +910,17 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 1, 
         text: '回首过去，感谢一路帮助自己的人（重情重义，但显得念旧）', 
-        stat_changes: { virtue: 10, favor: 3, insight: 3, sanity: 5, cruelty: -3, scheming: -2 } 
+        stat_changes: { virtue: 10, favor: 3, insight: 3, san: 5, cruelty: -3, scheming: -2 } 
       },
       { 
         id: 2, 
         text: '总结经验教训，为未来做准备（务实进取，但耗费心神）', 
-        stat_changes: { wisdom: 10, insight: 8, scheming: 5, favor: 2, sanity: -5, virtue: -2 } 
+        stat_changes: { wisdom: 10, insight: 8, scheming: 5, favor: 2, san: -5, virtue: -2 } 
       },
       { 
         id: 3, 
         text: '继续扩张势力，争取更高位置（野心勃勃，但招人忌惮）', 
-        stat_changes: { influence: 8, cruelty: 5, favor: 3, dread: 10, virtue: -5, sanity: -3 } 
+        stat_changes: { influence: 8, cruelty: 5, favor: 3, dread: 10, virtue: -5, san: -3 } 
       },
     ],
   },
@@ -946,7 +947,7 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 2, 
         text: '暗中观察各方反应，分析局势（明哲保身，但错失先机）', 
-        stat_changes: { insight: 10, scheming: 5, favor: -2, sanity: -3, virtue: 2, cruelty: 2 } 
+        stat_changes: { insight: 10, scheming: 5, favor: -2, san: -3, virtue: 2, cruelty: 2 } 
       },
       { 
         id: 3, 
@@ -978,12 +979,12 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 2, 
         text: '请求皇帝指点后宫的生存之道（虚心求教，但显得依赖）', 
-        stat_changes: { wisdom: 10, insight: 8, favor: 3, sanity: -3, virtue: -2, scheming: 3 } 
+        stat_changes: { wisdom: 10, insight: 8, favor: 3, san: -3, virtue: -2, scheming: 3 } 
       },
       { 
         id: 3, 
         text: '向皇帝坦诚自己内心的迷茫（真诚动人，但暴露弱点）', 
-        stat_changes: { favor: 5, virtue: 8, insight: 3, sanity: -5, cruelty: -2, dread: -3 } 
+        stat_changes: { favor: 5, virtue: 8, insight: 3, san: -5, cruelty: -2, dread: -3 } 
       },
     ],
     episode_end: true, // 第十集结束
