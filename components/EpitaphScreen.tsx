@@ -22,9 +22,10 @@ export default function EpitaphScreen({ onClose }: EpitaphScreenProps) {
   const [error, setError] = useState<string | null>(null);
   const [showFull, setShowFull] = useState(false);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     generateEpitaph();
-  }, []);
+  }, []);  // gameState is stable from zustand store, no need to re-run
 
   const generateEpitaph = async () => {
     if (!gameState) return;

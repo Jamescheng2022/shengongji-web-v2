@@ -1051,7 +1051,7 @@ export function getFixedScene(episode: number, section: number, previousChoice?:
 
 // EP_FLOWS 映射
 export const EP_FLOWS: Record<string, string[]> = {
-  ep1_flow: ['ep1_s1', 'ep1_s2_a', 'ep1_s2_b', 'ep1_s3'],
+  ep1_flow: ['ep1_s1', 'ep1_s2_a', 'ep1_s3'],  // ep1_s2_b is a branch via BRANCH_MAP
   ep2_flow: ['ep2_s1', 'ep2_s2', 'ep2_s3'],
   ep3_flow: ['ep3_s1', 'ep3_s2', 'ep3_s3'],
   ep4_flow: ['ep4_s1', 'ep4_s2', 'ep4_s3'],
@@ -1061,6 +1061,15 @@ export const EP_FLOWS: Record<string, string[]> = {
   ep8_flow: ['ep8_s1', 'ep8_s2', 'ep8_s3'],
   ep9_flow: ['ep9_s1', 'ep9_s2', 'ep9_s3'],
   ep10_flow: ['ep10_s1', 'ep10_s2', 'ep10_s3'],
+};
+
+// 分支映射：根据 sceneId + choiceId 决定下一场景
+export const BRANCH_MAP: Record<string, Record<number, string>> = {
+  'ep1_s1': {
+    1: 'ep1_s2_a',  // 选择1：隐忍退后
+    2: 'ep1_s2_b',  // 选择2：不卑不亢回应
+    3: 'ep1_s2_a',  // 选择3：解读潜台词 -> 默认走 a 分支
+  },
 };
 
 // ========== 判断是否使用固定剧本 ==========
@@ -1075,6 +1084,12 @@ export function shouldUseFixedScript(episode: number): boolean {
 export function getNextSceneId(currentSceneId: string, choiceId: number): string | undefined {
   const currentScene = FIXED_SCENES[currentSceneId];
   if (!currentScene) return undefined;
+  
+  // 优先检查分支映射（基于玩家选择的分支）
+  const branchNext = BRANCH_MAP[currentSceneId]?.[choiceId];
+  if (branchNext && FIXED_SCENES[branchNext]) {
+    return branchNext;
+  }
   
   // 如果有明确的下一场景指引
   if (currentScene.leads_to) {

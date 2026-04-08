@@ -113,7 +113,7 @@ export async function POST(req: Request) {
       throw new Error('Invalid JSON response');
     }
 
-    const epitaphData = JSON.parse(jsonMatch[1]) as EpitaphResult;
+    const epitaphData = JSON.parse(jsonMatch[1] || jsonMatch[0]) as EpitaphResult;
     console.log('[epitaph] Generated successfully');
 
     return new Response(JSON.stringify(epitaphData), {

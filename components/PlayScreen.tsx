@@ -91,7 +91,7 @@ export default function PlayScreen() {
       setChoices(lastChapterChoices);
       pendingChoicesRef.current = lastChapterChoices;
     }
-  }, [gameState, setChoices, setLastNarration]);
+  }, [gameState, setChoices, setLastNarration, triggerPrefetch]);
 
   // 自动滚到底部
   useEffect(() => {
@@ -202,7 +202,7 @@ export default function PlayScreen() {
         pendingChoicesRef.current = fallbackChoices;
       }
     },
-    [gameState, isLoading, currentChoices, addPlayerAction, setLoading, setStreamingText, applyAIResponse, setChoices, recordChapter]
+    [gameState, isLoading, currentChoices, addPlayerAction, setLoading, setStreamingText, setDisplayText, setLastNarration, applyAIResponse, setChoices, recordChapter, triggerPrefetch]
   );
 
   if (!gameState) return null;

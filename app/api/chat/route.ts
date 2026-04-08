@@ -5,7 +5,8 @@ import {
   shouldUseFixedScript, 
   getNextSceneId,
   FIXED_SCENES,
-  EP_FLOWS
+  EP_FLOWS,
+  BRANCH_MAP
 } from '@/lib/fixed-script';
 
 export async function POST(req: Request) {
@@ -40,8 +41,9 @@ export async function POST(req: Request) {
         const fallbackChoice = currentScene.choices[0];
         const selectedChoice = choice || fallbackChoice;
         
-        // 生成下一场景
-        const nextSceneId = getNextSceneId(currentSceneId, selectedChoice?.id || 1);
+        // 生成下一场景（传递正确的选择ID以支持分支）
+        const selectedChoiceId = selectedChoice?.id || 1;
+        const nextSceneId = getNextSceneId(currentSceneId, selectedChoiceId);
         const nextScene = nextSceneId ? FIXED_SCENES[nextSceneId] : null;
         
         // 确定是否结束当前集
