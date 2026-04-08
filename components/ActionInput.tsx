@@ -31,7 +31,6 @@ const STAT_LABELS: Record<keyof Stats, string> = {
   usefulness: "实用",
   dread: "忌惮",
   insight: "洞察",
-  insight_gained: "洞察",
 };
 
 // 获取属性变化的中文描述

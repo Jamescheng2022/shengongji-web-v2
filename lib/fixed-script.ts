@@ -55,7 +55,7 @@ export const FIXED_SCENES: Record<string, FixedScene> = {
       { 
         id: 3, 
         text: '消耗1点洞察力，解读乌兰的潜台词（深入分析局势，消耗心神）', 
-        stat_changes: { insight: -1, insight_gained: 3, san: -2, scheming: 2 },
+        stat_changes: { insight: 2, san: -2, scheming: 2 },
         requires_insight: true 
       },
     ],
