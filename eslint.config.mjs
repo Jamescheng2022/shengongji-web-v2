@@ -14,8 +14,7 @@ const eslintConfig = [
   {
     rules: {
       // 放宽规则避免阻塞开发
-      "@typescript-eslint/no-unused-vars": "warn",
-      "@typescript-eslint/no-explicit-any": "off",
+      "no-unused-vars": "warn",
       "react-hooks/exhaustive-deps": "warn",
     },
   },
