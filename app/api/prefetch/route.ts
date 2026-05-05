@@ -11,12 +11,38 @@ export async function POST(req: Request) {
       return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 });
     }
 
-    const apiKey = process.env.ZHIPU_API_KEY;
-    const baseURL = process.env.AI_BASE_URL || 'https://open.bigmodel.cn/api/paas/v4';
-    const model = process.env.AI_MODEL || 'glm-4-flash';
+    const zhipuKey = process.env.ZHIPU_API_KEY || '';
+    const openrouterKey = process.env.OPENROUTER_API_KEY || '';
+    const genericKey = process.env.AI_API_KEY || '';
+
+    let apiKey = '';
+    let baseURL = '';
+    let model = '';
+
+    if (zhipuKey) {
+      apiKey = zhipuKey;
+      baseURL = process.env.AI_BASE_URL || 'https://open.bigmodel.cn/api/paas/v4';
+      model = process.env.AI_MODEL || 'glm-4-flash';
+    } else if (openrouterKey) {
+      apiKey = openrouterKey;
+      baseURL = process.env.AI_BASE_URL || 'https://openrouter.ai/api/v1';
+      model = process.env.AI_MODEL || 'qwen/qwen3-8b:free';
+    } else if (genericKey) {
+      apiKey = genericKey;
+      baseURL = process.env.AI_BASE_URL || 'https://openrouter.ai/api/v1';
+      model = process.env.AI_MODEL || 'qwen/qwen3-8b:free';
+    }
 
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'API key not configured' }), { status: 500 });
+      return new Response(JSON.stringify({
+        skipped: true,
+        reason: 'No API key configured',
+        choice1: null,
+        choice2: null,
+        choice3: null,
+      }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     const systemPrompt = buildSystemPrompt(gameState);

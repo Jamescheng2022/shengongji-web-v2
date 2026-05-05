@@ -95,8 +95,11 @@ export async function POST(req: Request) {
   const model = process.env.AI_MODEL || (process.env.ZHIPU_API_KEY ? 'glm-4-flash' : 'openai/gpt-3.5-turbo');
 
   if (!apiKey) {
-    console.error('[chat] No API key configured');
-    return new Response(JSON.stringify({ error: 'API key not configured' }), { status: 500 });
+    const fallbackResponse = generateFallbackStory(gameState, playerInput);
+    setCache(cacheKey, fallbackResponse);
+    return new Response(JSON.stringify(fallbackResponse), {
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   // 获取摘要内容

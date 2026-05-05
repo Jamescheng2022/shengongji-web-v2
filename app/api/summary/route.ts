@@ -45,8 +45,7 @@ export async function POST(req: Request) {
   // 没有 API Key → 返回失败
   if (!apiKey) {
     console.log('[summary] No API key available');
-    return new Response(JSON.stringify({ error: 'No API key configured' }), {
-      status: 500,
+    return new Response(JSON.stringify({ skipped: true, reason: 'No API key configured' }), {
       headers: { 'Content-Type': 'application/json' },
     });
   }
